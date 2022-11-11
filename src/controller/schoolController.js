@@ -1,6 +1,7 @@
 const schoolModel = require("../models/schoolModel")
 const mongoose = require("mongoose")
-const jwt = require("jsonwebtoken")
+const jwt = require("jsonwebtoken");
+const studModel = require("../models/studModel");
 const isValidRequestBody = function (requestBody) {
     if (!requestBody) return false;
     if (Object.keys(requestBody).length == 0) return false;
@@ -24,7 +25,7 @@ const isValidObjectId = function (objectId) {
 const createSchool = async function (req, res) {
     try {
         const data = req.body;
-        const { SchoolName, email, password } = data
+        const { schoolName, email, password } = data
 
 
         //===== validate body ======//
@@ -32,16 +33,16 @@ const createSchool = async function (req, res) {
             return res.status(400).send({ status: false, message: "Body cannot be empty" });
         }
 
-        //===== validate SchoolName ======//
-        if (!isValidData(SchoolName)) {
+        //===== validate schoolName ======//
+        if (!isValidData(schoolName)) {
             return res.status(400).send({ status: false, message: "please enter your School Name" });
         }
-        if (!/^\s*[a-zA-Z0-9., ]{2,}\s*$/.test(SchoolName)) {
+        if (!/^\s*[a-zA-Z0-9., ]{2,}\s*$/.test(schoolName)) {
             return res.status(400).send({
-                status: false, message: `Heyyy....! ${SchoolName} is not a valid first name`,
+                status: false, message: `Heyyy....! ${schoolName} is not a valid first name`,
             });
         }
-        data.SchoolName = SchoolName.trim().split(" ").filter((word) => word).join(" ");
+        data.schoolName = schoolName.trim().split(" ").filter((word) => word).join(" ");
 
 
         //===== validate email ======//
@@ -120,6 +121,7 @@ let schoolLogin = async function (req, res) {
         let token = jwt.sign(
             {
                 schoolId: schoolId,
+                schoolName: schoolData.schoolName,
                 assignment: "School",
             }, "dataSchool", { expiresIn: '7d' },
 
@@ -141,19 +143,20 @@ let schoolLogin = async function (req, res) {
 const getSchool = async function (req, res) {
     try {
         let schoolId = req.params.schoolId
-        if (!isValidObjectId(schoolId)) {
-            return res.status(400).send({ status: false, message: " enter valid schoolId" });
-        }
 
         if (schoolId != req.schoolDetail)
             return res.status(403).send({ status: false, message: "Not Authourised to get data " })
 
-        const getschool = await schoolModel.findOne({ _id: schoolId })
+        let getschoolData = await schoolModel.findOne({ _id: schoolId }) 
+        const getstudent = await studModel.find({ schoolId: schoolId })
 
-        if (!getschool) {
+        getschoolData = JSON.parse(JSON.stringify(getschoolData))
+        getschoolData["students"] = getstudent
+       
+        if (!getschoolData) {
             return res.status(404).send({ status: false, message: "no school found" })
         }
-        res.status(200).send({ status: true, message: "school profile details", data: getschool })
+        res.status(200).send({ status: true, message: "school profile details", data: { getschoolData } })
 
     }
     catch (err) {
@@ -162,5 +165,7 @@ const getSchool = async function (req, res) {
     }
 
 }
+
+
 
 module.exports = { createSchool, schoolLogin, getSchool }

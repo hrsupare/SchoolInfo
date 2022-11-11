@@ -1,10 +1,16 @@
 const mongoose = require("mongoose")
 const schoolSchema = new mongoose.Schema({
-    SchoolName: {
+    schoolName: {
         type: String,
         require: true,
         trim: true
     },
+    students: [
+        {
+            type: String,
+            ref: "student"
+        }
+    ],
     email: {
         type: String,
         require: true,

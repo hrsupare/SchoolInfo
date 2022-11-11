@@ -4,9 +4,7 @@ const ObjectId = mongoose.Schema.Types.ObjectId
 const studentSchema = new mongoose.Schema({
     schoolId: {
         type: ObjectId,
-        ref: 'School',
-        required: true,
-        unique: true
+        ref: 'School'
     },
     firstName: {
         type: String,
@@ -18,13 +16,20 @@ const studentSchema = new mongoose.Schema({
         require: true,
         trim: true
     },
-    subject: {
-        subjectId: {
-            type: ObjectId,
-            ref: 'Subject',
-            unique: true
+    subject: [{
+        subjectName: {
+            type: String,
+            trim: true
         },
+        marks: {
+            type: Number
+        }
+    }],
+    isDeleted: {
+        type: Boolean,
+        default: false
     }
+
 }, { timestamps: true })
 
-module.exports = mongoose.model("student", studentSchema)
+module.exports = mongoose.model("stud", studentSchema)

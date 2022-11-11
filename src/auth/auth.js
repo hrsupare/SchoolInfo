@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken')
 const authenticate = async (req, res, next) => {
     try {
         const token = req.headers.authorization
+        // console.log(token);
 
         if (!token || token == "Bearer null") return res.status(401).send({ status: false, message: 'Token must be present in bearer token' })
 
@@ -15,6 +16,7 @@ const authenticate = async (req, res, next) => {
             }
             else {
                 req.schoolDetail = data.schoolId;
+                console.log(req.schoolDetail);
                 next()
             }
 
@@ -24,7 +26,6 @@ const authenticate = async (req, res, next) => {
 
         return res.status(500).send({ status: false, message: error.message })
     }
-
 }
 
 module.exports = { authenticate }
